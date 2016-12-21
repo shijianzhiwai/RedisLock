@@ -1,8 +1,4 @@
 <?php
-
-/**
-* 
-*/
 class RedisLock
 {
 	//redis连接
