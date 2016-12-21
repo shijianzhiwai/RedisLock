@@ -28,9 +28,6 @@ class RedisLock
         $this->redis = $redis;
 	}
 
-	/*FROM: http://redis.io/topics/distlock
-     *设置锁函数 ttl(ms) 可以在非model层调用
-     */
     public function redisLock($resource, $ttl=3000)
     {
         $token = uniqid();//产生唯一时间token
