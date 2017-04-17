@@ -14,23 +14,30 @@ class RedisLock
 	private $redispass = '123456';
 
 	//redis选择库
-	private $redis_select = 1;
+	private $redis_select = null;
 
-	function __construct()
+	public function __construct()
 	{
 		$redis = new Redis();
+        
         $redis->connect($this->redis_host, $this->redis_port);
+        
         if (strlen($this->redispass) !== 0)
         {
         	$redis->auth($this->redispass);	
         }
-        $redis->select($this->redis_select);
+
+        if ($this->redis_select !== null) 
+        {
+            $redis->select($this->redis_select);   
+        }
+
         $this->redis = $redis;
 	}
 
     public function redisLock($resource, $ttl=3000)
     {
-        $token = uniqid();//产生唯一时间token
+        $token = uniqid();
         
         if ($this->lockInstance($resource, $token, $ttl)) 
         {
@@ -40,6 +47,22 @@ class RedisLock
             );
         }
         return false;
+    }
+
+    //互斥锁的简单封装
+    public function blockRedisLock($resource, $ttl=3000)
+    {
+        $lock = FALSE;
+        while (TRUE) 
+        {
+            $lock = $this->redisLock($resource, $ttl);
+            if ($lock) {
+                break;
+            }
+            usleep(mt_rand(1,10));//尽量避免死锁
+        }
+
+        return $lock;
     }
 
     //解锁函数 需要使用加锁时返回的token才能解锁

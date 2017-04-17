@@ -6,16 +6,10 @@ $lock = new RedisLock();
 $key = 'test_key';
 $info = null;
 
-while(TRUE){
-	$info = $lock->redisLock($key)
-	if ($info) {
-		break;
-	}
-	//休眠随机40-60ms,提高锁命中率
-    usleep(mt_rand(40,60));
-}
+//互斥锁
+$info = $lock->blockRedisLock($key)
 
-//some code...
-//保证队列执行
+//TODO
+//...
 
 $lock->redisUnlock($key,$info['token']);
